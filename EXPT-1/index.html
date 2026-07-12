@@ -1,28 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Linear Regression Calculator</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-    <h1>Linear Regression Calculator</h1>
-    
+    <h1>Regression Calculator</h1>
+
     <div>
-        <label for="xInput">X Values (comma-separated):</label><br>
-        <input type="text" id="xInput" placeholder="e.g. 1.0, 2.0, 3.0, 4.0, 5.0" size="50"><br><br>
-        
-        <label for="yInput">Y Values (comma-separated):</label><br>
-        <input type="text" id="yInput" placeholder="e.g. 3.2, 4.8, 7.1, 9.3, 10.9" size="50"><br><br>
-        
+        <label for="xInput">X Values:</label><br>
+        <input type="text" id="xInput" size="50"><br><br>
+
+        <label for="yInput">Y Values:</label><br>
+        <input type="text" id="yInput" size="50"><br><br>
+
         <button id="btnSubmit">Submit</button>
         <button id="btnReset">Reset</button>
         <button id="btnVisualise">Visualise</button>
     </div>
-    
+
     <div id="errorDisplay" style="color: red; margin-top: 10px; font-weight: bold;"></div>
-    
+
     <h2>Results</h2>
     <div>
         <p><strong>Equation:</strong> <span id="eqDisplay">—</span></p>
@@ -31,10 +32,14 @@
         <p><strong>Root Mean Squared Error (RMSE):</strong> <span id="rmseVal">—</span></p>
         <p><strong>R-squared (R²):</strong> <span id="r2Val">—</span></p>
     </div>
-    
+
     <h2>Visualization</h2>
-    <div style="width: 600px; height: 400px;">
-        <canvas id="regressionChart"></canvas>
+    <div id="metricsGraphContainer" style="display: none; width: 900px; margin-top: 15px;">
+        <img id="metricsGraphImg" alt="Regression and Evaluation Dashboard"
+            style="max-width: 100%; height: auto; border: 1px solid #ccc;" />
+    </div>
+    <div id="metricsGraphFallback" style="display: none; color: rgb(255, 0, 0); margin-top: 10px;">
+        The Matplotlib visualization is only generated and served when running via the Python Flask server.
     </div>
 
     <script>
@@ -50,17 +55,23 @@
         const mseVal = document.getElementById('mseVal');
         const rmseVal = document.getElementById('rmseVal');
         const r2Val = document.getElementById('r2Val');
+        const metricsGraphContainer = document.getElementById('metricsGraphContainer');
+        const metricsGraphImg = document.getElementById('metricsGraphImg');
+        const metricsGraphFallback = document.getElementById('metricsGraphFallback');
 
-        let myChart = null;
         let calculatedState = null;
 
-        btnSubmit.addEventListener('click', calculateResults);
+        btnSubmit.addEventListener('click', () => calculateResults(false));
         btnReset.addEventListener('click', resetAll);
         btnVisualise.addEventListener('click', visualiseResults);
 
+        // Reset state on input changes so we recompute if inputs change
+        xInput.addEventListener('input', () => { calculatedState = null; });
+        yInput.addEventListener('input', () => { calculatedState = null; });
+
         function parseInputs() {
             errorDisplay.textContent = '';
-            
+
             const rawX = xInput.value.trim();
             const rawY = yInput.value.trim();
 
@@ -86,8 +97,10 @@
             return { x, y };
         }
 
-        async function calculateResults() {
+        async function calculateResults(showGraph = false) {
             try {
+                errorDisplay.textContent = '';
+
                 const { x, y } = parseInputs();
 
                 if (window.location.protocol.startsWith('http')) {
@@ -114,11 +127,37 @@
                         rmseVal.textContent = data.rmse.toFixed(6);
                         r2Val.textContent = isFinite(data.r_squared) ? data.r_squared.toFixed(6) : "—";
 
+                        if (data.metrics_graph) {
+                            metricsGraphImg.src = `data:image/png;base64,${data.metrics_graph}`;
+                            if (showGraph === true) {
+                                metricsGraphContainer.style.display = 'block';
+                                metricsGraphFallback.style.display = 'none';
+                            } else {
+                                metricsGraphContainer.style.display = 'none';
+                                metricsGraphFallback.style.display = 'none';
+                            }
+                        } else {
+                            metricsGraphContainer.style.display = 'none';
+                            if (showGraph === true) {
+                                metricsGraphFallback.style.display = 'block';
+                            } else {
+                                metricsGraphFallback.style.display = 'none';
+                            }
+                        }
+
                         calculatedState = { x, y, m, c };
                         return;
                     } catch (e) {
                         console.warn("Python backend request failed, falling back to local JS calculation:", e);
                     }
+                }
+
+                // Fallback to local JS calculation
+                metricsGraphContainer.style.display = 'none';
+                if (showGraph === true) {
+                    metricsGraphFallback.style.display = 'block';
+                } else {
+                    metricsGraphFallback.style.display = 'none';
                 }
 
                 const n = x.length;
@@ -139,7 +178,7 @@
                 const m = numerator / denominator;
                 const c = meanY - (m * meanX);
                 const yPred = x.map(val => m * val + c);
-                
+
                 let absErrSum = 0;
                 let sqErrSum = 0;
                 let totVarSum = 0;
@@ -154,7 +193,7 @@
                 const mae = absErrSum / n;
                 const mse = sqErrSum / n;
                 const rmse = Math.sqrt(mse);
-                
+
                 let r2;
                 if (totVarSum === 0) {
                     r2 = sqErrSum === 0 ? 1.0 : -Infinity;
@@ -163,7 +202,7 @@
                 }
 
                 const cSign = c >= 0 ? '+' : '-';
-                eqDisplay.textContent = `y = ${m.toFixed(4)}x ${cSign} ${Math.abs(c).toFixed(4)} (Computed by JS)`;
+                eqDisplay.textContent = `y = ${m.toFixed(4)}x ${cSign} ${Math.abs(c).toFixed(4)}`;
                 maeVal.textContent = mae.toFixed(6);
                 mseVal.textContent = mse.toFixed(6);
                 rmseVal.textContent = rmse.toFixed(6);
@@ -177,76 +216,22 @@
             }
         }
 
-        function visualiseResults() {
+        async function visualiseResults() {
             try {
                 if (!calculatedState) {
-                    calculateResults();
-                }
-                
-                if (calculatedState) {
-                    const { x, y, m, c } = calculatedState;
-                    renderChart(x, y, m, c);
+                    await calculateResults(true);
+                } else {
+                    if (window.location.protocol.startsWith('http')) {
+                        metricsGraphContainer.style.display = 'block';
+                        metricsGraphFallback.style.display = 'none';
+                    } else {
+                        metricsGraphContainer.style.display = 'none';
+                        metricsGraphFallback.style.display = 'block';
+                    }
                 }
             } catch (err) {
                 errorDisplay.textContent = err.message;
             }
-        }
-
-        function renderChart(x, y, m, c) {
-            const scatterData = x.map((val, idx) => ({ x: val, y: y[idx] }));
-            
-            const minX = Math.min(...x);
-            const maxX = Math.max(...x);
-            const padding = (maxX - minX) * 0.1 || 1.0;
-            
-            const lineStart = { x: minX - padding, y: m * (minX - padding) + c };
-            const lineEnd = { x: maxX + padding, y: m * (maxX + padding) + c };
-            
-            if (myChart) {
-                myChart.destroy();
-            }
-
-            const ctx = document.getElementById('regressionChart').getContext('2d');
-            myChart = new Chart(ctx, {
-                type: 'scatter',
-                data: {
-                    datasets: [
-                        {
-                            label: 'Actual Data Points',
-                            data: scatterData,
-                            backgroundColor: 'red',
-                            borderColor: 'red',
-                            pointRadius: 6,
-                            order: 2
-                        },
-                        {
-                            label: 'Regression Line (y = mx + c)',
-                            data: [lineStart, lineEnd],
-                            type: 'line',
-                            borderColor: 'blue',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            fill: false,
-                            tension: 0,
-                            order: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            position: 'bottom',
-                            title: { display: true, text: 'X' }
-                        },
-                        y: {
-                            title: { display: true, text: 'Y' }
-                        }
-                    }
-                }
-            });
         }
 
         function clearResultsDisplay() {
@@ -256,6 +241,9 @@
             rmseVal.textContent = '—';
             r2Val.textContent = '—';
             calculatedState = null;
+            metricsGraphContainer.style.display = 'none';
+            metricsGraphFallback.style.display = 'none';
+            metricsGraphImg.removeAttribute('src');
         }
 
         function resetAll() {
@@ -263,11 +251,8 @@
             yInput.value = '';
             errorDisplay.textContent = '';
             clearResultsDisplay();
-            if (myChart) {
-                myChart.destroy();
-                myChart = null;
-            }
         }
     </script>
 </body>
+
 </html>
