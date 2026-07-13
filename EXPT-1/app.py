@@ -43,11 +43,11 @@ def calculate_metrics(y_true, y_pred):
     else:
         r_squared = 1.0 - (ss_residual / ss_total)
     return float(mae), float(mse), float(rmse), float(r_squared)
-def generate_metrics_graph(x, y, m, c, mae, mse, rmse, r_squared):
+def generate_metrics_graph(x, y, m, c, mae, mse, rmse, r_squared, color_points='#f97316', color_line='#4f46e5'):
     x_arr = np.asarray(x, dtype=float)
     y_arr = np.asarray(y, dtype=float)
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))
-    ax1.scatter(x_arr, y_arr, color='#6366f1', edgecolor='#4f46e5', s=55, alpha=0.75, label='Actual Data Points')
+    ax1.scatter(x_arr, y_arr, color=color_points, edgecolor=color_points, s=55, alpha=0.75, label='Actual Data Points')
     min_x = x_arr.min()
     max_x = x_arr.max()
     padding_x = (max_x - min_x) * 0.1 if max_x != min_x else 1.0
@@ -55,7 +55,7 @@ def generate_metrics_graph(x, y, m, c, mae, mse, rmse, r_squared):
     y_line = m * x_line + c
     c_sign = '+' if c >= 0 else '-'
     line_label = f'Regression Line\n$y = {m:.4f}x {c_sign} {abs(c):.4f}$'
-    ax1.plot(x_line, y_line, color='#3b82f6', linestyle='-', linewidth=2.2, label=line_label)
+    ax1.plot(x_line, y_line, color=color_line, linestyle='-', linewidth=2.2, label=line_label)
     ax1.set_xlabel('X Values', fontsize=11, fontweight='bold', labelpad=8)
     ax1.set_ylabel('Y Values', fontsize=11, fontweight='bold', labelpad=8)
     ax1.set_title('Regression Fit Line', fontsize=13, fontweight='bold', pad=12, color='#1f2937')
@@ -63,7 +63,7 @@ def generate_metrics_graph(x, y, m, c, mae, mse, rmse, r_squared):
     ax1.grid(True, linestyle=':', alpha=0.5)
     metrics_labels = ['MSE', 'MAE', 'RMSE', 'R2']
     metrics_values = [mse, mae, rmse, r_squared]
-    ax2.plot(metrics_labels, metrics_values, 'o', color='#8b5cf6', markersize=7)
+    ax2.plot(metrics_labels, metrics_values, 'o', color=color_points, markersize=7)
     ax2.set_xlabel('Evaluation Metrics', fontsize=11, fontweight='normal')
     ax2.set_ylabel('Value', fontsize=11, fontweight='normal')
     ax2.set_title('Model Metrics Comparison', fontsize=13, fontweight='normal', pad=10)
@@ -78,6 +78,12 @@ def generate_metrics_graph(x, y, m, c, mae, mse, rmse, r_squared):
                 text_str = text_str[:-1]
         ax2.text(i + 0.05, val, text_str, fontsize=10, va='center', ha='left')
     plt.tight_layout()
+    
+    # Save the figure to graph.png on disk
+    save_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'graph.png'))
+    plt.savefig(save_path, dpi=150)
+    
+    # Save to memory buffer
     buf = io.BytesIO()
     plt.savefig(buf, format='png', dpi=150)
     plt.close(fig)
@@ -95,12 +101,14 @@ def calculate():
             return jsonify({'status': 'error', 'message': 'No inputs provided.'}), 400
         x = data.get('x', [])
         y = data.get('y', [])
+        color_points = data.get('color_points', '#f97316')
+        color_line = data.get('color_line', '#4f46e5')
         m, c = calculate_linear_regression(x, y)
         x_arr = np.asarray(x, dtype=float)
         y_pred_arr = m * x_arr + c
         y_pred = y_pred_arr.tolist()
         mae, mse, rmse, r_squared = calculate_metrics(y, y_pred)
-        graph_base64 = generate_metrics_graph(x, y, m, c, mae, mse, rmse, r_squared)
+        graph_base64 = generate_metrics_graph(x, y, m, c, mae, mse, rmse, r_squared, color_points, color_line)
         return jsonify({
             'status': 'success',
             'm': m,

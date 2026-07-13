@@ -214,6 +214,7 @@
         const metricsGraphImg = document.getElementById('metricsGraphImg');
         const metricsGraphFallback = document.getElementById('metricsGraphFallback');
         let calculatedState = null;
+
         btnSubmit.addEventListener('click', () => calculateResults(false));
         btnReset.addEventListener('click', resetAll);
         btnVisualise.addEventListener('click', visualiseResults);
@@ -258,7 +259,10 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ x, y })
+                            body: JSON.stringify({
+                                x,
+                                y
+                            })
                         });
                         const data = await response.json();
                         if (data.status === 'error') {
