@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - Multiple Linear Regression</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e1;
+            --input-focus: #3b82f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 3px;
+        }
+
+        .btn-back {
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: background-color 0.15s ease;
+        }
+
+        .btn-back:hover {
+            background-color: #e2e8f0;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dashboard-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        .equation-card {
+            background-color: #f1f5f9;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .equation-text {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #0f172a;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        .eq-var { color: #0284c7; }
+        .eq-op { color: #e11d48; margin: 0 4px; }
+        .eq-op-mul { color: #7c3aed; margin: 0 2px; }
+        .eq-x { color: #059669; }
+
+        .coef-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .coef-card {
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .coef-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .coef-val {
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: SFMono-Regular, Consolas, monospace;
+            color: #0f172a;
+        }
+
+        /* Predict Form */
+        .pred-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .pred-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pred-label {
+            font-size: 0.85rem;
+            color: var(--text-color);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .input-box {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+
+        .input-box:focus {
+            border-color: var(--input-focus);
+        }
+
+        .btn-predict {
+            background-color: var(--primary);
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+            border: none;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-predict:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-predict:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary-action {
+            background-color: #475569;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+            border: none;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-secondary-action:hover {
+            background-color: #334155;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Predict Result Card */
+        .prediction-result-card {
+            margin-top: 15px;
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        .prediction-result-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .prediction-result-card.hide {
+            display: none;
+        }
+
+        .prediction-result-label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #0369a1;
+            margin-bottom: 4px;
+        }
+
+        .prediction-result-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            font-family: SFMono-Regular, Consolas, monospace;
+            color: #0369a1;
+        }
+
+        /* Visualizations */
+        .viz-card {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .img-container {
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .img-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-nav">
+            <div class="header-title">
+                <h1>Regression Results</h1>
+                <p>Target Variable: <strong>{{ y_name }}</strong></p>
+            </div>
+            <a href="/" class="btn-back">Restart Calculator</a>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="main-column">
+                
+                <!-- Equation Section -->
+                <div class="dashboard-card">
+                    <h3 class="card-title">Regression Model</h3>
+                    <div class="equation-card">
+                        <div id="equation-text" class="equation-text">{{ equation }}</div>
+                    </div>
+
+                    <h4 class="coef-label" style="margin-bottom: 8px;">Coefficients</h4>
+                    <div class="coef-grid">
+                        <div class="coef-card">
+                            <span class="coef-label">Intercept (b0)</span>
+                            <span class="coef-val">{{ intercept }}</span>
+                        </div>
+                        {% for name, slope in slopes.items() %}
+                            <div class="coef-card">
+                                <span class="coef-label">Slope: {{ name }}</span>
+                                <span class="coef-val">{{ slope }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <h4 class="coef-label" style="margin-top: 20px; margin-bottom: 8px;">Performance Metrics</h4>
+                    <div class="coef-grid">
+                        <div class="coef-card">
+                            <span class="coef-label">R-Squared (R2)</span>
+                            <span class="coef-val">{{ r2 }}</span>
+                        </div>
+                        <div class="coef-card">
+                            <span class="coef-label">Mean Absolute Error (MAE)</span>
+                            <span class="coef-val">{{ mae }}</span>
+                        </div>
+                        <div class="coef-card">
+                            <span class="coef-label">Mean Squared Error (MSE)</span>
+                            <span class="coef-val">{{ mse }}</span>
+                        </div>
+                        <div class="coef-card">
+                            <span class="coef-label">Root Mean Squared Error (RMSE)</span>
+                            <span class="coef-val">{{ rmse }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prediction Section -->
+                <div class="dashboard-card">
+                    <h3 class="card-title">Predictor</h3>
+                    <form id="predict-form" action="/predict" method="POST">
+                        <input type="hidden" name="y_name" value="{{ y_name }}">
+                        <input type="hidden" name="y_input" value="{{ y_input }}">
+                        <input type="hidden" name="x_raw_str" value="{{ x_raw_str }}">
+
+                        <div class="pred-grid">
+                            {% for name in x_names %}
+                                <div class="pred-field">
+                                    <label class="pred-label">Value for <strong>{{ name }}</strong> (x{{ loop.index }})</label>
+                                    <input type="number" step="any" name="pred_x_{{ loop.index0 }}" class="input-box" placeholder="Enter value..." required>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <button type="submit" id="predict-btn" class="btn-predict">Predict {{ y_name }}</button>
+                    </form>
+
+                    <!-- Prediction Result Alert -->
+                    <div id="prediction-result-card" class="prediction-result-card hide">
+                        <span class="prediction-result-label">Predicted value (y)</span>
+                        <span id="prediction-result-value" class="prediction-result-value">-</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="side-column">
+                
+                <!-- Visualizations Card -->
+                <div class="dashboard-card">
+                    <h3 class="card-title">Visualizations</h3>
+                    <button type="button" id="toggle-viz-btn" class="btn-secondary-action">Visualise Graphs</button>
+                    
+                    <div id="visualisation-content" style="display: none; flex-direction: column; gap: 15px; margin-top: 15px;">
+                        <h4 class="coef-label" style="margin-top: 10px;">Model Evaluation Plot</h4>
+                        <div class="img-container">
+                            <img src="data:image/png;base64,{{ plot1 }}" alt="Accuracy Plot">
+                        </div>
+
+                        <h4 class="coef-label" style="margin-top: 10px;">Performance Metrics</h4>
+                        <div class="img-container">
+                            <img src="data:image/png;base64,{{ plot2 }}" alt="Metrics Plot">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Highlighting for the regression equation syntax
+        document.addEventListener('DOMContentLoaded', () => {
+            const eqEl = document.getElementById('equation-text');
+            if (eqEl) {
+                let html = eqEl.innerHTML;
+                html = html.replace(/^(y\s*=)/, '<span class="eq-var">$1</span>');
+                html = html.replace(/(\+)/g, '<span class="eq-op">$1</span>');
+                html = html.replace(/(\*)/g, '<span class="eq-op-mul">$1</span>');
+                html = html.replace(/(x\d+)/g, '<span class="eq-x">$1</span>');
+                eqEl.innerHTML = html;
+            }
+        });
+
+        // Asynchronous prediction handling
+        document.getElementById('predict-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const resultCard = document.getElementById('prediction-result-card');
+            const resultVal = document.getElementById('prediction-result-value');
+            const btn = document.getElementById('predict-btn');
+            
+            btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner"></span> Predicting...`;
+            
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error("Prediction failed");
+                }
+                
+                const htmlText = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                const h2 = doc.querySelector('h2');
+                
+                if (h2) {
+                    const match = h2.textContent.match(/:\s*(-?\d+\.?\d*)/);
+                    if (match && match[1]) {
+                        const predictedVal = parseFloat(match[1]).toFixed(4);
+                        resultVal.textContent = predictedVal;
+                        resultCard.classList.remove('hide');
+                        setTimeout(() => {
+                            resultCard.classList.add('show');
+                        }, 10);
+                        resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    } else {
+                        resultVal.textContent = "Error parsing response";
+                        resultCard.classList.remove('hide');
+                        resultCard.classList.add('show');
+                    }
+                } else {
+                    resultVal.textContent = "Error: Invalid response format";
+                    resultCard.classList.remove('hide');
+                    resultCard.classList.add('show');
+                }
+            } catch (err) {
+                resultVal.textContent = "Error: " + err.message;
+                resultCard.classList.remove('hide');
+                resultCard.classList.add('show');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+
+        // Visualisation show/hide toggle logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('toggle-viz-btn');
+            const vizContent = document.getElementById('visualisation-content');
+            if (toggleBtn && vizContent) {
+                toggleBtn.addEventListener('click', () => {
+                    if (vizContent.style.display === 'none') {
+                        vizContent.style.display = 'flex';
+                        toggleBtn.textContent = 'Hide Graphs';
+                        toggleBtn.style.backgroundColor = '#64748b'; // slightly lighter slate when active
+                    } else {
+                        vizContent.style.display = 'none';
+                        toggleBtn.textContent = 'Visualise Graphs';
+                        toggleBtn.style.backgroundColor = '#475569';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
