@@ -6,8 +6,8 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import io
-import base64
+import os
+import time
 
 app = Flask(__name__)
 
@@ -68,24 +68,26 @@ def calculate():
     equation_str = f"y = {intercept:.4f} + " + " + ".join(equation_terms)
     slopes = {x_names[i]: f"{coef:.4f}" for i, coef in enumerate(coefficients)}
 
-    plt.scatter(y_vals, predictions, color="#10b981", edgecolor="#065f46", linewidth=1, s=50, alpha=0.85)
+    plt.scatter(y_vals, predictions, color="#ec4899", edgecolor="#be185d", linewidth=1, s=60, alpha=0.85)
     min_val = min(float(np.min(y_vals)), float(np.min(predictions)))
     max_val = max(float(np.max(y_vals)), float(np.max(predictions)))
-    plt.plot([min_val, max_val], [min_val, max_val], color="#64748b", linestyle="-.", linewidth=1.5)
+    plt.plot([min_val, max_val], [min_val, max_val], color="#3b82f6", linestyle="-.", linewidth=1.5)
     plt.xlabel(f"Actual {y_name}")
     plt.ylabel(f"Predicted {y_name}")
     plt.title("Model Prediction Accuracy Evaluation")
     plt.grid(True)
     
-    buf1 = io.BytesIO()
-    plt.savefig(buf1, format="png")
-    buf1.seek(0)
-    plot1_base64 = base64.b64encode(buf1.read()).decode("utf-8")
+    # Ensure static directory exists
+    os.makedirs(app.static_folder, exist_ok=True)
+
+    plot1_filename = 'accuracy_plot.png'
+    plot1_path = os.path.join(app.static_folder, plot1_filename)
+    plt.savefig(plot1_path, format="png", bbox_inches='tight')
     plt.close()
 
     metrics_names = ["R2 Score", "RMSE", "MAE", "MSE"]
     metrics_vals = [r2, rmse, mae, mse]
-    colors = ["#4f46e5", "#3b82f6", "#60a5fa", "#93c5fd"]
+    colors = ["#ec4899", "#8b5cf6", "#3b82f6", "#10b981"]
     bars = plt.barh(metrics_names, metrics_vals, color=colors)
     for bar in bars:
         width = bar.get_width()
@@ -95,13 +97,13 @@ def calculate():
     plt.title("Linear Regression Performance Metrics")
     plt.grid(True)
 
-    buf2 = io.BytesIO()
-    plt.savefig(buf2, format="png")
-    buf2.seek(0)
-    plot2_base64 = base64.b64encode(buf2.read()).decode("utf-8")
+    plot2_filename = 'metrics_plot.png'
+    plot2_path = os.path.join(app.static_folder, plot2_filename)
+    plt.savefig(plot2_path, format="png", bbox_inches='tight')
     plt.close()
 
     x_raw_str = ";".join(x_values_raw)
+    timestamp = int(time.time())
 
     return render_template('result.html', 
                            equation=equation_str, 
@@ -111,8 +113,9 @@ def calculate():
                            y_input=y_input,
                            x_names=x_names,
                            x_raw_str=x_raw_str,
-                           plot1=plot1_base64, 
-                           plot2=plot2_base64,
+                           plot1_filename=plot1_filename, 
+                           plot2_filename=plot2_filename,
+                           timestamp=timestamp,
                            mse=f"{mse:.4f}",
                            mae=f"{mae:.4f}",
                            rmse=f"{rmse:.4f}",

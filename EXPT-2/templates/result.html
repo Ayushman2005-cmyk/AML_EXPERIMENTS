@@ -410,12 +410,12 @@
                     <div id="visualisation-content" style="display: none; flex-direction: column; gap: 15px; margin-top: 15px;">
                         <h4 class="coef-label" style="margin-top: 10px;">Model Evaluation Plot</h4>
                         <div class="img-container">
-                            <img src="data:image/png;base64,{{ plot1 }}" alt="Accuracy Plot">
+                            <img src="{{ url_for('static', filename=plot1_filename) }}?v={{ timestamp }}" alt="Accuracy Plot">
                         </div>
 
                         <h4 class="coef-label" style="margin-top: 10px;">Performance Metrics</h4>
                         <div class="img-container">
-                            <img src="data:image/png;base64,{{ plot2 }}" alt="Metrics Plot">
+                            <img src="{{ url_for('static', filename=plot2_filename) }}?v={{ timestamp }}" alt="Metrics Plot">
                         </div>
                     </div>
                 </div>
