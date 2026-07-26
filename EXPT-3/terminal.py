@@ -17,19 +17,19 @@ def train_and_evaluate(X, y, title):
 def plot_chart(ctype, x, y, title, xl, yl, p=None):
     plt.figure()
     if ctype == 'scatter_line':
-        plt.scatter(x, y, color='b', label='Actual')
-        plt.plot(x, p, color='r', lw=2, label='Regression')
+        plt.scatter(x, y, color='#06b6d4', label='Actual')
+        plt.plot(x, p, color='#7c3aed', lw=2, label='Regression')
     elif ctype == 'actual_vs_pred':
-        plt.scatter(x, y, color='purple', label='Predictions')
-        plt.plot([x.min(), x.max()], [x.min(), x.max()], 'r--', label='Ideal Fit')
+        plt.scatter(x, y, color='#f43f5e', label='Predictions')
+        plt.plot([x.min(), x.max()], [x.min(), x.max()], color='#10b981', linestyle='--', label='Ideal Fit')
     elif ctype == 'metrics_bar':
-        bars = plt.barh(["MAE", "MSE", "RMSE", "R2"], x, color=['#4C72B0', '#DD8452', '#55A868', '#C44E52'])
+        bars = plt.barh(["MAE", "MSE", "RMSE", "R2"], x, color=['#7c3aed', '#06b6d4', '#10b981', '#f59e0b'])
         for b in bars: plt.annotate(f"{b.get_width():.4f}", xy=(b.get_width(), b.get_y() + b.get_height()/2), va="center")
     if ctype != 'metrics_bar': plt.legend()
     plt.title(title); plt.xlabel(xl); plt.ylabel(yl); plt.grid(True); plt.show()
 df = pd.read_csv('https://raw.githubusercontent.com/Ayushman2005-cmyk/AML_EXPERIMENTS/main/EXPT-3/studentGradeDataSet.csv')
 print(f"Shape: {df.shape}\n\nNulls:\n{df.isnull().sum()}\n\nStats:\n{df.describe()}")
-sns.heatmap(df.corr(), annot=True, cmap='coolwarm').set_title('Correlation Heatmap'); plt.show()
+sns.heatmap(df.corr(), annot=True, cmap='viridis').set_title('Correlation Heatmap'); plt.show()
 df.plot(kind='box', subplots=True, figsize=(15, 4)); plt.tight_layout(); plt.show()
 X, y = df[['SEM 1', 'SEM 2', 'SEM 3', 'SEM 4']], df['SEM 5']
 best = X.corrwith(y).abs().idxmax()
