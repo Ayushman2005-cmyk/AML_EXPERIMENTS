@@ -27,7 +27,7 @@ def plot_chart(ctype, x, y, title, xl, yl, p=None):
         for b in bars: plt.annotate(f"{b.get_width():.4f}", xy=(b.get_width(), b.get_y() + b.get_height()/2), va="center")
     if ctype != 'metrics_bar': plt.legend()
     plt.title(title); plt.xlabel(xl); plt.ylabel(yl); plt.grid(True); plt.show()
-df = pd.read_csv('https://raw.githubusercontent.com/RajeshRanaGiet/AML-LAB/main/Experiment%203/studentGradeDataSet.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/Ayushman2005-cmyk/AML_EXPERIMENTS/main/EXPT-3/studentGradeDataSet.csv')
 print(f"Shape: {df.shape}\n\nNulls:\n{df.isnull().sum()}\n\nStats:\n{df.describe()}")
 sns.heatmap(df.corr(), annot=True, cmap='coolwarm').set_title('Correlation Heatmap'); plt.show()
 df.plot(kind='box', subplots=True, figsize=(15, 4)); plt.tight_layout(); plt.show()
