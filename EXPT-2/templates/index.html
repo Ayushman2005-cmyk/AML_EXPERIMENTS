@@ -3,227 +3,388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multiple Linear Regression Calculator</title>
+    <title>Multiple Linear Regression Studio</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --border-color: #e2e8f0;
-            --text-color: #1e293b;
-            --text-muted: #64748b;
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --input-bg: #ffffff;
-            --input-border: #cbd5e1;
-            --input-focus: #3b82f6;
+            --bg-color: #0f172a;
+            --bg-gradient: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 70%);
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.35);
+            --secondary: #06b6d4;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --input-border: rgba(255, 255, 255, 0.12);
+            --input-focus: #6366f1;
+            --accent-pink: #ec4899;
+            --accent-emerald: #10b981;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: var(--font-main);
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background: var(--bg-color);
+            background-image: var(--bg-gradient);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(0,0,0,0) 70%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
+            position: relative;
+            z-index: 1;
             width: 100%;
-            max-width: 750px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            max-width: 800px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 40px rgba(99, 102, 241, 0.1);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #818cf8;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent-emerald);
+            box-shadow: 0 0 8px var(--accent-emerald);
         }
 
         .header {
-            margin-bottom: 25px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 20px;
         }
 
         .header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 6px;
+            font-size: 2.1rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
         .header p {
             color: var(--text-muted);
             font-size: 0.95rem;
+            line-height: 1.5;
         }
 
         .section {
-            margin-bottom: 25px;
+            margin-bottom: 28px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
         }
 
         .section-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #818cf8;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 15px;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .row-container {
             display: grid;
-            grid-template-columns: 40px 180px 1fr;
-            gap: 15px;
+            grid-template-columns: 50px 180px 1fr 40px;
+            gap: 12px;
             align-items: center;
             margin-bottom: 12px;
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .row-index {
-            font-weight: 600;
-            color: var(--text-muted);
-            text-align: right;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #c084fc;
+            background: rgba(192, 132, 252, 0.1);
+            border: 1px solid rgba(192, 132, 252, 0.2);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .row-index.y-index {
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.2);
         }
 
         .input-box {
             width: 100%;
             background-color: var(--input-bg);
             border: 1px solid var(--input-border);
-            border-radius: 6px;
-            padding: 10px 12px;
+            border-radius: 8px;
+            padding: 10px 14px;
             font-size: 0.9rem;
-            color: var(--text-color);
+            color: var(--text-main);
             outline: none;
-            transition: border-color 0.15s ease;
+            transition: all 0.2s ease;
+        }
+
+        .input-box::placeholder {
+            color: #64748b;
         }
 
         .input-box:focus {
             border-color: var(--input-focus);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            background-color: rgba(15, 23, 42, 0.85);
         }
 
-        .input-helper {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-            display: block;
+        .btn-remove {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border-radius: 8px;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-remove:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: #ffffff;
+            border-color: rgba(239, 68, 68, 0.5);
         }
 
         .actions-wrapper {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 20px;
-            border-top: 1px solid var(--border-color);
+            gap: 12px;
+            margin-top: 24px;
             padding-top: 20px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .actions-left {
+            display: flex;
+            gap: 10px;
         }
 
         button {
             border: none;
             outline: none;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 0.9rem;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            padding: 10px 16px;
-            transition: all 0.15s ease;
+            padding: 11px 18px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-secondary {
-            background-color: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            color: #334155;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
         }
 
         .btn-secondary:hover {
-            background-color: #e2e8f0;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
         }
 
         .btn-primary {
-            background-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
             color: #ffffff;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            padding: 11px 24px;
         }
 
         .btn-primary:hover {
-            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+            filter: brightness(1.08);
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 650px) {
+            .container { padding: 24px 18px; }
             .row-container {
                 grid-template-columns: 1fr;
                 gap: 8px;
-                border-bottom: 1px solid var(--border-color);
-                padding-bottom: 12px;
+                background: rgba(255,255,255,0.02);
+                padding: 12px;
+                border-radius: 8px;
             }
-            .row-index {
-                text-align: left;
-            }
-            .actions-wrapper {
-                flex-direction: column;
-                gap: 12px;
-            }
-            button {
-                width: 100%;
-            }
+            .btn-remove { width: 100%; height: 34px; }
+            .actions-wrapper { flex-direction: column; }
+            .actions-left { width: 100%; flex-direction: column; }
+            button { width: 100%; }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <div class="badge">
+            <span class="badge-dot"></span>
+            Machine Learning Model Studio
+        </div>
         <div class="header">
             <h1>Multiple Linear Regression</h1>
-            <p>Compute coefficients, evaluate performance metrics, and predict values</p>
+            <p>Define target and feature variables to fit standard linear regression, evaluate metrics, and run instant predictions.</p>
         </div>
         
-        <form action="/calculate" method="POST">
+        <form action="/calculate" method="POST" id="regression-form">
             <div class="section">
-                <h3 class="section-title">Target Variable (y)</h3>
-                <div class="row-container">
-                    <div class="row-index">y:</div>
-                    <input type="text" name="y_name" class="input-box" placeholder="Target Name" required>
-                    <div>
-                        <input type="text" name="y_values" class="input-box" placeholder="Values (comma-separated, e.g. 10, 20, 30)" required>
-                    </div>
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        Target Variable (y)
+                    </h3>
+                </div>
+                <div class="row-container" style="grid-template-columns: 50px 180px 1fr;">
+                    <div class="row-index y-index">y</div>
+                    <input type="text" name="y_name" id="y_name" class="input-box" placeholder="Target Name (e.g. Price)" required>
+                    <input type="text" name="y_values" id="y_values" class="input-box" placeholder="Values comma-separated (e.g. 150, 200, 280, 310)" required>
                 </div>
             </div>
 
             <div class="section">
-                <h3 class="section-title">Feature Variables (x)</h3>
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                        Feature Variables (x)
+                    </h3>
+                </div>
                 <div id="features-wrapper">
-                    <div class="row-container">
-                        <span class="row-index">x1:</span>
-                        <input type="text" name="x_name_0" class="input-box" placeholder="Feature Name" required>
-                        <input type="text" name="x_values_0" class="input-box" placeholder="Values (comma-separated, e.g. 1, 2, 3)" required>
+                    <div class="row-container" id="feature-row-0">
+                        <span class="row-index">x1</span>
+                        <input type="text" name="x_name_0" class="input-box" placeholder="Feature Name (e.g. Size)" required>
+                        <input type="text" name="x_values_0" class="input-box" placeholder="Values (e.g. 1000, 1400, 1800, 2100)" required>
+                        <div></div>
                     </div>
                 </div>
             </div>
 
             <div class="actions-wrapper">
-                <button type="button" class="btn-secondary" onclick="addFeatureRow()">+ Add Feature</button>
-                <button type="submit" class="btn-primary">Calculate Regression</button>
+                <div class="actions-left">
+                    <button type="button" class="btn-secondary" onclick="addFeatureRow()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Add Feature
+                    </button>
+                </div>
+                <button type="submit" class="btn-primary">
+                    Calculate Model
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
             </div>
         </form>
     </div>
 
     <script>
         let featureCount = 1;
+
         function addFeatureRow() {
             const wrapper = document.getElementById('features-wrapper');
             const newRow = document.createElement('div');
+            const currentIdx = featureCount;
             newRow.className = 'row-container';
+            newRow.id = `feature-row-${currentIdx}`;
             newRow.innerHTML = `
-                <span class="row-index">x${featureCount + 1}:</span>
-                <input type="text" name="x_name_${featureCount}" class="input-box" placeholder="Feature Name" required>
-                <input type="text" name="x_values_${featureCount}" class="input-box" placeholder="Values" required>
+                <span class="row-index">x${currentIdx + 1}</span>
+                <input type="text" name="x_name_${currentIdx}" class="input-box" placeholder="Feature Name" required>
+                <input type="text" name="x_values_${currentIdx}" class="input-box" placeholder="Values comma-separated" required>
+                <button type="button" class="btn-remove" title="Remove Feature" onclick="removeFeatureRow('feature-row-${currentIdx}')">&times;</button>
             `;
             wrapper.appendChild(newRow);
             featureCount++;
+        }
+
+        function removeFeatureRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+            }
         }
     </script>
 </body>

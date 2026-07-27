@@ -68,38 +68,43 @@ def calculate():
     equation_str = f"y = {intercept:.4f} + " + " + ".join(equation_terms)
     slopes = {x_names[i]: f"{coef:.4f}" for i, coef in enumerate(coefficients)}
 
-    plt.scatter(y_vals, predictions, color="#ec4899", edgecolor="#be185d", linewidth=1, s=60, alpha=0.85)
+    plt.figure(figsize=(6, 4.2), dpi=150)
+    plt.scatter(y_vals, predictions, color="#6366f1", edgecolor="#4338ca", linewidth=1.2, s=70, alpha=0.85, label="Actual vs Predicted")
     min_val = min(float(np.min(y_vals)), float(np.min(predictions)))
     max_val = max(float(np.max(y_vals)), float(np.max(predictions)))
-    plt.plot([min_val, max_val], [min_val, max_val], color="#3b82f6", linestyle="-.", linewidth=1.5)
-    plt.xlabel(f"Actual {y_name}")
-    plt.ylabel(f"Predicted {y_name}")
-    plt.title("Model Prediction Accuracy Evaluation")
-    plt.grid(True)
+    plt.plot([min_val, max_val], [min_val, max_val], color="#06b6d4", linestyle="--", linewidth=2, label="Ideal Fit Line")
+    plt.xlabel(f"Actual {y_name}", fontsize=10, fontweight='bold', color="#1e293b")
+    plt.ylabel(f"Predicted {y_name}", fontsize=10, fontweight='bold', color="#1e293b")
+    plt.title("Model Prediction Accuracy Evaluation", fontsize=11, fontweight='bold', color="#0f172a", pad=12)
+    plt.grid(True, linestyle=":", alpha=0.5)
+    plt.legend(frameon=True, facecolor="#ffffff", edgecolor="#cbd5e1")
+    plt.tight_layout()
     
     # Ensure static directory exists
     os.makedirs(app.static_folder, exist_ok=True)
 
     plot1_filename = 'accuracy_plot.png'
     plot1_path = os.path.join(app.static_folder, plot1_filename)
-    plt.savefig(plot1_path, format="png", bbox_inches='tight')
+    plt.savefig(plot1_path, format="png", bbox_inches='tight', dpi=150)
     plt.close()
 
+    plt.figure(figsize=(6, 4.2), dpi=150)
     metrics_names = ["R2 Score", "RMSE", "MAE", "MSE"]
     metrics_vals = [r2, rmse, mae, mse]
-    colors = ["#ec4899", "#8b5cf6", "#3b82f6", "#10b981"]
-    bars = plt.barh(metrics_names, metrics_vals, color=colors)
+    colors = ["#ec4899", "#8b5cf6", "#0284c7", "#10b981"]
+    bars = plt.barh(metrics_names, metrics_vals, color=colors, height=0.55, edgecolor="none")
     for bar in bars:
         width = bar.get_width()
-        plt.annotate(f" {width:.4f}", xy=(width, bar.get_y() + bar.get_height() / 2), ha='left', va='center', fontweight='bold')    
-    plt.xlabel("Computed Values")
-    plt.ylabel("Metric Value")
-    plt.title("Linear Regression Performance Metrics")
-    plt.grid(True)
+        plt.annotate(f" {width:.4f}", xy=(width, bar.get_y() + bar.get_height() / 2), ha='left', va='center', fontweight='bold', color="#0f172a")    
+    plt.xlabel("Computed Value", fontsize=10, fontweight='bold', color="#1e293b")
+    plt.ylabel("Metric Name", fontsize=10, fontweight='bold', color="#1e293b")
+    plt.title("Linear Regression Performance Metrics", fontsize=11, fontweight='bold', color="#0f172a", pad=12)
+    plt.grid(True, linestyle=":", alpha=0.5)
+    plt.tight_layout()
 
     plot2_filename = 'metrics_plot.png'
     plot2_path = os.path.join(app.static_folder, plot2_filename)
-    plt.savefig(plot2_path, format="png", bbox_inches='tight')
+    plt.savefig(plot2_path, format="png", bbox_inches='tight', dpi=150)
     plt.close()
 
     x_raw_str = ";".join(x_values_raw)
@@ -144,7 +149,7 @@ def predict():
             sample_dict[f'x{idx+1}'] = val
 
         predicted_val = model.predict(pd.DataFrame([sample_dict]))[0]
-        return f"<h2>Predicted {y_name} (y): {predicted_val:.4f}</h2><br><a href='javascript:history.back()'>Go Back</a>"
+        return f"<div style='font-family: system-ui; text-align: center; padding: 60px 20px; background: #0f172a; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center;'><div style='background: rgba(30,41,59,0.8); border: 1px solid rgba(255,255,255,0.1); padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); max-width: 500px; width: 100%;'><h2 style='font-size: 1.6rem; margin-bottom: 20px; color: #38bdf8;'>Predicted {y_name} (y): <span style='color: #10b981; font-family: monospace; font-weight: 800;'>{predicted_val:.4f}</span></h2><a href='javascript:history.back()' style='background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;'>← Go Back</a></div></div>"
     except Exception:
         return "Invalid input numbers entered for prediction.", 400
 
