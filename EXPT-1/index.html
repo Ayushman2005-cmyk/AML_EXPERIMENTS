@@ -1,203 +1,471 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Linear Regression Calculator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #090d16;
+            --card-bg: rgba(19, 26, 42, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #6366f1;
+            --accent-primary-hover: #4f46e5;
+            --accent-emerald: #10b981;
+            --accent-emerald-hover: #059669;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --input-border: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
+            background-attachment: fixed;
+            color: var(--text-main);
             margin: 0;
-            padding: 2rem;
+            padding: 2.5rem 1rem;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
+            align-items: center;
         }
+
         .app-container {
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
             padding: 2.5rem;
-            max-width: 900px;
+            max-width: 920px;
             width: 100%;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
-            box-sizing: border-box;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 30px rgba(99, 102, 241, 0.1);
+            position: relative;
+            overflow: hidden;
         }
-        h1 {
-            font-size: 1.8rem;
-            margin-top: 0;
-            margin-bottom: 1.5rem;
-            color: #0f172a;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 0.75rem;
+
+        .app-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #a855f7, #10b981);
         }
-        h2 {
-            font-size: 1.4rem;
-            margin-top: 2rem;
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.85rem;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 9999px;
+            color: #818cf8;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
             margin-bottom: 1rem;
-            color: #1e293b;
-            border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 0.5rem;
         }
-        .input-group {
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin: 0 0 0.5rem 0;
+            background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 2.25rem;
             margin-bottom: 1.25rem;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.01em;
         }
-        label {
+
+        h2::before {
+            content: '';
             display: inline-block;
+            width: 4px;
+            height: 1.2rem;
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
             font-weight: 600;
-            font-size: 0.9rem;
-            color: #475569;
+            font-size: 0.875rem;
+            color: #cbd5e1;
             margin-bottom: 0.5rem;
         }
+
         input[type="text"] {
             width: 100%;
-            padding: 0.6rem 0.8rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
+            padding: 0.85rem 1.1rem;
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
             font-size: 0.95rem;
-            color: #1e293b;
-            background-color: #ffffff;
-            box-sizing: border-box;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: 'JetBrains Mono', monospace;
+            color: #f8fafc;
+            background-color: var(--input-bg);
+            transition: all 0.25s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
+
+        input[type="text"]::placeholder {
+            color: #64748b;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
         input[type="text"]:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            border-color: var(--accent-primary);
+            background-color: rgba(15, 23, 42, 0.85);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
+
+
+
         .button-group {
-            margin-top: 1.5rem;
+            margin-top: 1.75rem;
             display: flex;
             flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        button {
+            padding: 0.75rem 1.4rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             gap: 0.5rem;
         }
-        button {
-            padding: 0.6rem 1.2rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid #cbd5e1;
-            background-color: #ffffff;
-            color: #334155;
-        }
-        button:hover {
-            background-color: #f1f5f9;
-            border-color: #94a3b8;
-        }
+
         button:active {
-            transform: scale(0.97);
+            transform: translateY(1px) scale(0.98);
         }
+
         #btnSubmit {
-            background-color: #3b82f6;
-            border-color: #2563eb;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
             color: #ffffff;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
         }
+
         #btnSubmit:hover {
-            background-color: #2563eb;
-            border-color: #1d4ed8;
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+            transform: translateY(-1px);
         }
+
         #btnVisualise {
-            background-color: #10b981;
-            border-color: #059669;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: #ffffff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
         }
+
         #btnVisualise:hover {
-            background-color: #059669;
-            border-color: #047857;
+            background: linear-gradient(135deg, #059669, #047857);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+            transform: translateY(-1px);
         }
+
+        #btnReset {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #cbd5e1;
+        }
+
+        #btnReset:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
         #errorDisplay {
-            margin-top: 1rem;
-            padding: 0.75rem 1rem;
-            background-color: #fef2f2;
-            border: 1px solid #fca5a5;
-            border-radius: 6px;
-            color: #b91c1c;
-            font-size: 0.9rem;
-            font-weight: bold;
+            margin-top: 1.25rem;
+            padding: 0.85rem 1.1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            color: #fca5a5;
+            font-size: 0.875rem;
+            font-weight: 600;
             display: none;
+            animation: fadeIn 0.3s ease;
         }
-        .results-display p {
-            margin: 0.75rem 0;
-            font-size: 0.95rem;
-            color: #334155;
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .equation-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .equation-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #a5b4fc;
+        }
+
         .equation-box {
-            font-family: monospace;
-            background-color: #f1f5f9;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: #0f172a;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ffffff;
+            word-break: break-all;
         }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            padding: 1.1rem 1.25rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .metric-card.mae::before {
+            background: #3b82f6;
+        }
+
+        .metric-card.mse::before {
+            background: #8b5cf6;
+        }
+
+        .metric-card.rmse::before {
+            background: #f59e0b;
+        }
+
+        .metric-card.r2::before {
+            background: #10b981;
+        }
+
+        .metric-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
         .metric-highlight {
-            font-weight: 600;
-            color: #0f172a;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: block;
         }
+
         #metricsGraphContainer {
             margin-top: 1rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 0.5rem;
-            background-color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 0.75rem;
+            background: rgba(15, 23, 42, 0.7);
             max-width: 100%;
             box-sizing: border-box;
             display: none;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
         }
+
         #metricsGraphImg {
-            max-width: 100%;
+            width: 100%;
             height: auto;
-            border-radius: 4px;
+            border-radius: 8px;
             display: block;
         }
+
         #metricsGraphFallback {
             margin-top: 1rem;
-            padding: 0.75rem 1rem;
-            background-color: #fffbeb;
-            border: 1px solid #fde68a;
-            border-radius: 6px;
-            color: #b45309;
-            font-size: 0.9rem;
+            padding: 1rem 1.25rem;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 12px;
+            color: #fbbf24;
+            font-size: 0.875rem;
+            line-height: 1.5;
             display: none;
         }
     </style>
 </head>
+
 <body>
     <div class="app-container">
-        <h1>Regression Calculator</h1>
+        <div class="header-badge">
+            <span>⚡ Experiment 1</span>
+            <span>•</span>
+            <span>AML Machine Learning</span>
+        </div>
+        <h1>Linear Regression Calculator</h1>
+        <p class="subtitle">Enter coordinate arrays to compute ordinary least squares regression and evaluation metrics.
+        </p>
+
         <div class="input-group">
             <label for="xInput">X Values (comma-separated):</label>
-            <input type="text" id="xInput" placeholder="e.g. 1, 2, 3, 4, 5">
+            <input type="text" id="xInput" placeholder="e.g. 1, 2, 3, 4, 5" autocomplete="off">
         </div>
+
         <div class="input-group">
             <label for="yInput">Y Values (comma-separated):</label>
-            <input type="text" id="yInput" placeholder="e.g. 2, 4, 5, 4, 5">
+            <input type="text" id="yInput" placeholder="e.g. 2, 4, 5, 4, 5" autocomplete="off">
         </div>
+
+
+
         <div class="button-group">
-            <button id="btnSubmit">Submit</button>
-            <button id="btnReset">Reset</button>
-            <button id="btnVisualise">Visualise</button>
+            <button id="btnSubmit">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Submit
+            </button>
+            <button id="btnVisualise">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Visualise
+            </button>
+            <button id="btnReset">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reset
+            </button>
         </div>
+
         <div id="errorDisplay"></div>
+
         <h2>Results</h2>
-        <div class="results-display">
-            <p><strong>Equation:</strong> <span id="eqDisplay" class="equation-box">—</span></p>
-            <p><strong>Mean Absolute Error (MAE):</strong> <span id="maeVal" class="metric-highlight">—</span></p>
-            <p><strong>Mean Squared Error (MSE):</strong> <span id="mseVal" class="metric-highlight">—</span></p>
-            <p><strong>Root Mean Squared Error (RMSE):</strong> <span id="rmseVal" class="metric-highlight">—</span></p>
-            <p><strong>R-squared (R²):</strong> <span id="r2Val" class="metric-highlight">—</span></p>
+        <div class="results-container">
+            <div class="equation-card">
+                <span class="equation-title">Fitted Regression Equation</span>
+                <div id="eqDisplay" class="equation-box">—</div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card mae">
+                    <div class="metric-name">Mean Absolute Error (MAE)</div>
+                    <span id="maeVal" class="metric-highlight">—</span>
+                </div>
+                <div class="metric-card mse">
+                    <div class="metric-name">Mean Squared Error (MSE)</div>
+                    <span id="mseVal" class="metric-highlight">—</span>
+                </div>
+                <div class="metric-card rmse">
+                    <div class="metric-name">Root Mean Squared Error (RMSE)</div>
+                    <span id="rmseVal" class="metric-highlight">—</span>
+                </div>
+                <div class="metric-card r2">
+                    <div class="metric-name">R-Squared (R²)</div>
+                    <span id="r2Val" class="metric-highlight">—</span>
+                </div>
+            </div>
         </div>
+
         <h2>Visualization</h2>
         <div id="metricsGraphContainer">
             <img id="metricsGraphImg" alt="Regression and Evaluation Dashboard" />
         </div>
         <div id="metricsGraphFallback">
-            The Matplotlib visualization is only generated and served when running via the Python Flask server.
+            💡 The Matplotlib visualization graph is dynamically rendered when serving this application via the Python
+            Flask server (`python app.py`).
         </div>
     </div>
+
     <script>
         const xInput = document.getElementById('xInput');
         const yInput = document.getElementById('yInput');
@@ -220,6 +488,9 @@
         btnVisualise.addEventListener('click', visualiseResults);
         xInput.addEventListener('input', () => { calculatedState = null; });
         yInput.addEventListener('input', () => { calculatedState = null; });
+
+
+
         function showError(msg) {
             errorDisplay.textContent = msg;
             errorDisplay.style.display = 'block';
@@ -386,4 +657,5 @@
         }
     </script>
 </body>
+
 </html>
